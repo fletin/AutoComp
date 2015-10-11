@@ -1,4 +1,11 @@
+# ver 1.01
+# .supports multitask simultaneously
 import os,sys
+import uuid
+
+
+#Generate uuid to make sure filename unique
+task_uuid=str(uuid.uuid1())
 
 #tools path
 x264_path=sys.path[0]+"\\x264\\x264.exe"
@@ -10,14 +17,14 @@ work_path=sys.path[0]
 
 #avs filters
 newfps=0
-newx=1280
-newy=720
+newx=848
+newy=480
 
 #x264 para
 x264_preset="veryslow" # faster normal slow veryslow, lower the speed, higher the compress ratio
 x264_bitrate="2000"    # kb/s  *time(seconds)/8/1024/1024=MB
 #x264_1passOutput="NUL" # one for no result while the other gets v2 for crf22
-x264_1passOutput="\""+work_path+"\\temp\\v.mp4\""
+x264_1passOutput="\""+work_path+"\\temp\\"+task_uuid+".v.mp4\""
 crf_value=24
 
 
@@ -84,7 +91,7 @@ ext_name=sys.argv[1].split(".")[-1]
 if ext_name.upper()=="AVS":
 	avspath=sys.argv[1]
 else:
-	avspath=work_path+"\\temp\\temp.avs"
+	avspath=work_path+"\\temp\\"+task_uuid+".avs"
 	avsfile=open(avspath,"w+")
 
 	if ext_name.upper()=="AVI":
@@ -110,16 +117,16 @@ else:
 
 #Video Section
 #x264
-os.system(x264_path+" --pass 1 --stats \""+sys.path[0]+"\\temp\\temp.stats\" --level 5.1 --preset "+x264_preset+" --tune psnr --crf "+str(crf_value)+" --output "+x264_1passOutput+" \""+avspath+"\"")
+os.system(x264_path+" --pass 1 --stats \""+sys.path[0]+"\\temp\\"+task_uuid+".stats\" --level 5.1 --preset "+x264_preset+" --tune psnr --crf "+str(crf_value)+" --output "+x264_1passOutput+" \""+avspath+"\"")
 #os.system(x264_path+" --pass 2 --stats \""+sys.path[0]+"\\temp\\temp.stats\" --level 5.1 --preset "+x264_preset+" --tune psnr --bitrate "+x264_bitrate+" --output \""+work_path+"\\temp\\v.mp4\" \""+avspath+"\"")
 
 
 #Audio Section - neroaac
-os.system(bepipe_path+" --script \"Import(^"+avspath+"^)\" | \""+nero_path+"\" -lc -cbr 96000 -if - -of "+work_path+"\\temp\\a.m4a\"")
+os.system(bepipe_path+" --script \"Import(^"+avspath+"^)\" | \""+nero_path+"\" -lc -cbr 96000 -if - -of "+work_path+"\\temp\\"+task_uuid+".a.m4a\"")
 
 
 #Muxing
-os.system(mp4box_path+" -add \""+work_path+"\\temp\\v.mp4\" -add \""+work_path+"\\temp\\a.m4a\" \""+sys.argv[1]+".mp4\"")
+os.system(mp4box_path+" -add \""+work_path+"\\temp\\"+task_uuid+".v.mp4\" -add \""+work_path+"\\temp\\"+task_uuid+".a.m4a\" \""+sys.argv[1]+".mp4\"")
 
 
 
@@ -128,3 +135,4 @@ os.system(mp4box_path+" -add \""+work_path+"\\temp\\v.mp4\" -add \""+work_path+"
 print("Finished.")
 os.system("pause")
 os.system("del "+work_path+"\\temp\\*.* /q")
+
